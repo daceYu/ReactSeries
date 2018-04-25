@@ -1,5 +1,13 @@
 [#](#)
 
+### 运行
+
+- git clone
+- npm install 
+- npm run start
+
+
+
 ### 目录说明
 
 ```js
