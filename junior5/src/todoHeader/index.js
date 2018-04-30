@@ -10,52 +10,35 @@ import './index.less';
 export default class Header extends Component {
 	constructor (props) {
 		super(props);
-		this.state = { 
-			completedAll: false // 是否全部选中 false: 否,true: 是
+		this.state = {
+			placeHolder: "What needs to be done?",  // 输入框默认提示
+			showIcon: true, // 是否显示 选中按钮 true: 显示，false: 隐藏
+			completedAll: true // 是否全部选中 true: 是，false: 否
 		}
-	}
-
-	/* HOOK */
-	componentDidMount () {
-		this.judgeDataEmpty();
-		this.isSelectedAll();
-	}
-	/* HOOK */
-	componentWillReceiveProps (nextProps) {
-		this.judgeDataEmpty();
-		this.isSelectedAll();
+		this.observerUpdate();
 	}
 
 	/**
-	 * 判断数据是否为空
-	 * @return {Boolean} true: 是  false: 否
+	 * 监听按钮的状态变化
 	 */
-	judgeDataEmpty () {
-		if (this.props.data.list.length <= 0) return false;
-		return true;
-	}
-
-	/**
-	 * 判断是否全选
-	 */
-	isSelectedAll () {
-		let completedAll = true;
-		this.props.data.list.forEach((item, index) => {
-			if (!item.completed) completedAll = false; // 存在数据未选中
+	observerUpdate () {
+		this.props.events.on("updateAll", (obj) => {
+			this.setState({
+				showIcon:  obj.showIcon,
+				completedAll: obj.completedAll
+			})
 		})
-		this.setState({ completedAll })
 	}
 
 	/**
-	 * 操作所有数据：全选/全不选
-	 * @param {Number | String} index: 操作的数据的下标
-	 * @param {Boolean} flag: true选中，false不选中
+	 * 全部选中 / 全部不选中
 	 */
-	ChangeStatus () {
-		this.setState({
+	selectDataAll () {
+		this.setState({ completedAll: !this.state.completedAll })
+		this.props.events.emit("operateAll", {
+			showIcon: true,
 			completedAll: !this.state.completedAll
 		})
-		this.props.changeAll(!this.state.completedAll);
 	}
 
 	/**
@@ -72,7 +55,11 @@ export default class Header extends Component {
 	 */
 	handler (e) {
 		if (!e.target.value) return false;
-		this.props.addData(e.target.value);
+
+		this.props.events.emit("addData", {
+			title: e.target.value,
+			completed: false
+		})
 		e.target.value = "";
 	}
 
@@ -80,10 +67,10 @@ export default class Header extends Component {
 	render () {
 		return (
 			<header className="todo-header f-tc u-flex">
-				<a className={!this.judgeDataEmpty() ? "g-pr z-hide_0" : this.state.completedAll ? "g-pr active" : "g-pr"} 
-				   onClick={(e) => this.ChangeStatus()}> </a>
+				<a className={!this.state.showIcon ? "g-pr z-hide_0" : this.state.completedAll ? "g-pr active" : "g-pr"}
+				   onClick={(e) => this.selectDataAll()}> </a>
 				<input type="text" 
-					   placeholder={this.props.data.defaultVal} 
+					   placeholder={this.state.placeHolder} 
 					   onKeyUp={(e) => this.onkeyup(e)} 
 					   onBlur={(e) => this.handler(e)} />
 			</header>

@@ -11,51 +11,48 @@ export default class Footer extends Component {
 	constructor (props) {
 		super(props);
 		this.state = {
-			text: "0 item left",
-			showclear: false,
-			showFooter: false
+			showFooter: true, // 是否展示功能栏
+			text: "0 item left", // 剩余任务数量
+			listType: ["All", "Active", "completed"],  // 功能栏按钮
+			showList: "All",  // 功能栏默认选中按钮
+			clean: "clear completed", // 清除选中任务
+			showclear: false  // 是否展示清除按钮
 		}
+		this.observerUpdate();
 	}
 
 	/* HOOK */
 	componentDidMount () {
-		this.itemHandler(this.props.data.list);
-	}
-	/* HOOK */
-	componentWillReceiveProps (nextProps) {
-		this.itemHandler(nextProps.data.list);
+		this.navToggle(this.state.showList);
 	}
 
 	/**
-	 * 数据处理
-	 *（数据列表是否为空，是否有选中数据，剩余未选数据条数）
-	 * @param {Object} data: 列表数据
+	 * 订阅 需要更新底部 功能区的 状态
 	 */
-	itemHandler (data) {
-		let count = 0,
-			_state = {};
-		for (let i in data) if (!data[i].completed) count++;
-		_state = {
-			showFooter: data.length > 0 ? true : false,
-			showclear: (data.length - count > 0),
-			text: `${count} item left`
-		}
-		this.setState(_state);
+	observerUpdate () {
+		this.props.events.on("updateFooter", (obj) => {
+			this.setState({
+				text: `${obj.leftCount} item left`,
+				showFooter: obj.showFooter,
+				showclear: obj.hasCompleted
+			});
+		})
+	}
+
+	/** 
+	 * 切换展示不同状态的数据
+	 * @param {String} item: 状态值
+	 */
+	navToggle (item) {
+		this.setState({ showList: item });
+		this.props.events.emit("showType", item);
 	}
 
 	/**
-	 * 展示某一类型的数据
-	 * @param {String} name: 类型的值
+	 * 清除已完成的任务
 	 */
-	navToggle (name) {
-		this.props.changeType(name);
-	}
-
-	/**
-	 * 删除已选中的数据
-	 */
-	clear () {
-		this.props.clearCompleted();
+	clean () {
+		this.props.events.emit("clean");
 	}
 
 	/**
@@ -63,13 +60,11 @@ export default class Footer extends Component {
 	 * @return {Array} items: JSX
 	 */
 	getList () {
-		let itemJsx = this.props.data.listType.map((item, index) => 
-				<li className={item === this.props.data.showList ? "f-fl current" : "f-fl"}
+		let itemJsx = this.state.listType.map((item, index) => 
+				<li className={item === this.state.showList ? "f-fl current" : "f-fl"}
 					key={index}
 					onClick={(e) => this.navToggle(item, e)}
-				>
-					{item}
-				</li>
+				>{item}</li>
 		)
 		return <ul>{itemJsx}</ul>
 	}
@@ -82,8 +77,8 @@ export default class Footer extends Component {
 				<section className="u-flex">
 					<header>{this.state.text}</header>
 					{this.getList()}
-					<a onClick={(e) => this.clear(e)} 
-					   className={this.state.showclear ? "" : "z-hide"}>{this.props.data.clean}</a>
+					<a className={this.state.showclear ? "" : "z-hide"}
+					   onClick={(e) => this.clean()}>{this.state.clean}</a>
 				</section>
 			</footer>
 		)

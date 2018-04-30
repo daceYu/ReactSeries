@@ -11,39 +11,133 @@ export default class List extends Component {
 	constructor (props) {
 		super(props);
 		this.state = {
-			items: []  // 列表Item JSX
+			listType: ["All", "Active", "completed"],  // 所有的数据类型
+			showList: "All",  // 当前展示的数据类型
+			items: [],  // 列表Item JSX
+			list: [ // 任务列表
+				{ 
+					title: "learn react",
+					completed: true
+				},
+				{ 
+					title: "finsh homeword",
+					completed: false
+				}
+			]
 		}
 	}
 
 	/* HOOK */
 	componentDidMount () {
-		this.dataHandler(this.props.data);
-	}
+		this.dataHandler(this.state);
 
-	/* HOOK */
-	componentWillReceiveProps (nextProps) {
-		this.dataHandler(nextProps.data);
-	}
-
-	/**
-	 * 选择/取消选择 当前选项
-	 * @param {Boolean} flag: true 已选、取消选择，false 未选，选择该选项
-	 * @param e: 目标对象
-	 */
-	selectItem (flag, e) {
-		let index = e.target.parentNode.getAttribute("index");
-		this.props.selectItem(index, !flag);
+		this.addData();
+		this.operateAll();
+		this.showThisType();
+		this.clean();
 	}
 
 	/**
-	 * 删除 当前选项
-	 * @param e: 目标对象
+	 * 数据增加
 	 */
-	deleteItem (e) {
-		let index = e.target.parentNode.getAttribute("index");
-		this.props.deleteItem(index);
+	addData () {
+		this.props.events.on("addData", (obj) => {
+			// 判断任务是否已存在
+			let hasThisTask = false;
+			for (let i in this.state.list) {
+				if (this.state.list[i].title === obj.title) {
+					let tipStr = `This task has been added, ${this.state.list[i].completed ? "You've done it." : "Please finish it as soon as possible."}`;
+					alert(tipStr);
+					hasThisTask = true;
+				}
+			}
+			if (hasThisTask) return false;
+
+			// 添加任务
+			this.state.list.push(obj);
+			// this.setState(this.state);
+			this.dataHandler(this.state);
+		})
 	}
 
+	/**
+	 * 数据全选/全不选
+	 */
+	operateAll () {
+		this.props.events.on("operateAll", (obj) => {
+			for (let i in this.state.list) this.state.list[i].completed = obj.completedAll ? true : false;
+			this.dataHandler(this.state);
+		})
+	}
+
+	/**
+	 * 展示指定状态的数据
+	 */
+	showThisType () {
+		this.props.events.on("showType", (item) => {
+			this.state.showList = item;
+			this.dataHandler(this.state);
+		})
+	}
+
+	/**
+	 * 清理已完成的数据
+	 */
+	 clean () {
+		this.props.events.on("clean", () => {
+			for (let i in this.state.list) if (this.state.list[i].completed) delete this.state.list[i];
+			this.dataHandler(this.state);
+		})
+	 }
+
+	/**
+	 * 选中某条数据
+	 * @param {Number} index: 选中数据的序列号
+	 * @param {Boolean} status: 选中数据的状态
+	 */
+	selectItem (index, status) {
+		this.state.list[index].completed = !status;
+		this.dataHandler(this.state);
+	}
+
+	/**
+	 * 删除某条数据
+	 * @param {Number} index: 删除数据的序列号
+	 */
+	deleteItem (index) {
+		delete this.state.list[index];
+		this.dataHandler(this.state);
+	}
+
+	/**
+	 * 计算数据
+	 * 是否有任务、是否全部完成、是否有完成的任务、未完成任务的数量
+	 */
+	calculate () {
+		let all_obj = {
+			showIcon: false,
+			completedAll: true
+		};
+		let footer_obj = {
+			showFooter: false,
+			leftCount: 0,
+			hasCompleted: false
+		}
+		for (let i in this.state.list) {
+			all_obj.showIcon = footer_obj.showFooter = true;
+			if (!this.state.list[i].completed) {
+				footer_obj.leftCount++;
+				all_obj.completedAll = false;
+			} else {
+				footer_obj.hasCompleted = true;
+			}
+		}
+
+		this.props.events.emit("updateAll", all_obj);
+		this.props.events.emit("updateFooter", footer_obj);
+	}
+
+	
 	/**
 	 * 处理任务列表数据
 	 * @param {Object} data: 任务列表数据
@@ -59,10 +153,10 @@ export default class List extends Component {
 						key={i} 
 						index={i}>
 						<a className="select g-pr" 
-						   onClick={(e) => this.selectItem(info.completed, e)}> </a>
+						   onClick={(e) => this.selectItem(i, info.completed)}> </a>
 						<p>{info.title}</p>
 						<a className="destory g-pr g-fs48 f-tr" 
-						   onClick={(e) => this.deleteItem(e)}>×</a>
+						   onClick={(e) => this.deleteItem(i)}>×</a>
 					</li>
 				);
 
@@ -73,6 +167,7 @@ export default class List extends Component {
 			}
 		}
 		this.setState({ items });
+		this.calculate();
 	}
 
 	/* HOOK */
