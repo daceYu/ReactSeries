@@ -18,7 +18,6 @@ export default class App extends Component {
 		super(props);
 
 		this.eventEmitter = new EventEmitter();
-
 		this.state = {
 			title: "Todos"  // 页面标题
 		}
