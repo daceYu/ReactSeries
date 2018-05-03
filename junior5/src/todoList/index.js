@@ -65,8 +65,11 @@ export default class List extends Component {
 	 */
 	operateAll () {
 		this.props.events.on("operateAll", (obj) => {
-			for (let i in this.state.list) this.state.list[i].completed = obj.completedAll ? true : false;
-			this.dataHandler(this.state);
+			let _state = this.state;
+			for (let i in _state.list) _state.list[i].completed = obj.completedAll ? true : false;
+			this.setState(_state, () => {
+				this.dataHandler(this.state);
+			})
 		})
 	}
 
@@ -75,8 +78,9 @@ export default class List extends Component {
 	 */
 	showThisType () {
 		this.props.events.on("showType", (item) => {
-			this.state.showList = item;
-			this.dataHandler(this.state);
+			this.setState({ showList: item }, () => {
+				this.dataHandler(this.state);
+			})
 		})
 	}
 
@@ -96,8 +100,11 @@ export default class List extends Component {
 	 * @param {Boolean} status: 选中数据的状态
 	 */
 	selectItem (index, status) {
-		this.state.list[index].completed = !status;
-		this.dataHandler(this.state);
+		let obj = this.state;
+		obj.list[index].completed = !status;
+		this.setState(obj, () => {
+			this.dataHandler(this.state);
+		})
 	}
 
 	/**
