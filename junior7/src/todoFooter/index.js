@@ -4,41 +4,40 @@
  * @Author: daceyu <daceyu@aliyun.com> 
  */
 import React,{Component} from 'react';
-import Action from '../myFlux/action';
+import CREATOR from '../redux/actionCreator';
 
 import './index.less';
 
 export default class Footer extends Component {
 	constructor (props) {
 		super(props);
-		this.state = {
-			showFooter: true, // 是否展示功能栏
-			text: "0 item left", // 剩余任务数量
-			listType: ["All", "Active", "completed"],  // 功能栏按钮
-			showList: "All",  // 功能栏默认选中按钮
-			clean: "clear completed", // 清除选中任务
-			showclear: false  // 是否展示清除按钮
-		}
-		this.action = new Action();
+
+		this.state = {}
 		this.observerUpdate();
 	}
 
-	/* HOOK */
 	componentDidMount () {
-		this.navToggle(this.state.showList);
+		this.dataUpdate();
 	}
 
-	/**
-	 * 订阅 需要更新底部 功能区的 状态
-	 */
+	/* 数据更新 */
+	dataUpdate () {
+		let _data = this.props.store.getState();
+		let _state = {
+			showFooter: _data.showFooter,
+			text: _data.footer.remain_text,
+			listType: _data.footer.func,
+			showList: _data.footer.current,
+			clean: _data.footer.clean_text,
+			showclear: _data.footer.showClear
+		}
+		this.setState(_state);
+	}
+
+	/* 订阅 需要更新底部 功能区的 状态 */
 	observerUpdate () {
-		this.props.store.on("updateFooter", (data) => {
-			let obj = data["updateFooter"];
-			this.setState({
-				text: `${obj.leftCount} item left`,
-				showFooter: obj.showFooter,
-				showclear: obj.hasCompleted
-			});
+		this.props.store.subscribe(() => {
+			this.dataUpdate();
 		})
 	}
 
@@ -47,15 +46,15 @@ export default class Footer extends Component {
 	 * @param {String} item: 状态值
 	 */
 	navToggle (item) {
-		this.setState({ showList: item });
-		this.action.dataHandler("showType", item);
+		if (this.state.showList === item) return false;
+		this.props.store.dispatch(CREATOR.filterData({
+			current: item
+		}))
 	}
 
-	/**
-	 * 清除已完成的任务
-	 */
+	/* 清除已完成的任务 */
 	clean () {
-		this.action.dataHandler("clean");
+		this.props.store.dispatch(CREATOR.cleanSelected());
 	}
 
 	/**
@@ -63,6 +62,8 @@ export default class Footer extends Component {
 	 * @return {Array} items: JSX
 	 */
 	getList () {
+		if (!this.state.listType) return "";
+
 		let itemJsx = this.state.listType.map((item, index) => 
 				<li className={item === this.state.showList ? "f-fl current" : "f-fl"}
 					key={index}

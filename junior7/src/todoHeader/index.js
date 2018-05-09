@@ -4,44 +4,40 @@
  * @Author: daceyu <daceyu@aliyun.com> 
  */
 import React,{Component} from 'react';
-import Action from '../myFlux/action';
+import CREATOR from '../redux/actionCreator';
 
 import './index.less';
 
 export default class Header extends Component {
 	constructor (props) {
 		super(props);
+
+		let _data = this.props.store.getState();
 		this.state = {
-			placeHolder: "What needs to be done?",  // 输入框默认提示
-			showIcon: true, // 是否显示 选中按钮 true: 显示，false: 隐藏
-			completedAll: true // 是否全部选中 true: 是，false: 否
-		}
-		this.action = new Action();
+			showIcon: _data.showIcon,
+			completedAll: _data.completedAll,
+			placeholder: _data.header.placeholder
+		};
+
 		this.observerUpdate();
 	}
 
-	/**
-	 * 监听按钮的状态变化
-	 */
+	/* 监听按钮的状态变化*/
 	observerUpdate () {
-		this.props.store.on("updateAll", (data) => {
-			let obj = data["updateAll"]
+		this.props.store.subscribe(() => {
+			let _data = this.props.store.getState();
 			this.setState({
-				showIcon:  obj.showIcon,
-				completedAll: obj.completedAll
-			})
+				showIcon: _data.showIcon,
+				completedAll: _data.completedAll
+			});
 		})
 	}
 
-	/**
-	 * 全部选中 / 全部不选中
-	 */
+	/* 全部选中 / 全部不选中 */
 	selectDataAll () {
-		this.setState({ completedAll: !this.state.completedAll })
-		this.action.dataHandler("operateAll", {
-			showIcon: true,
+		this.props.store.dispatch(CREATOR.operateAll({
 			completedAll: !this.state.completedAll
-		})
+		}))
 	}
 
 	/**
@@ -59,10 +55,10 @@ export default class Header extends Component {
 	handler (e) {
 		if (!e.target.value) return false;
 
-		this.action.dataHandler("addData", {
-			title: e.target.value,
+		this.props.store.dispatch(CREATOR.addData({
+			text: e.target.value,
 			completed: false
-		})
+		}))
 		e.target.value = "";
 	}
 
@@ -73,9 +69,9 @@ export default class Header extends Component {
 				<a className={!this.state.showIcon ? "g-pr z-hide_0" : this.state.completedAll ? "g-pr active" : "g-pr"}
 				   onClick={(e) => this.selectDataAll()}> </a>
 				<input type="text" 
-					   placeholder={this.state.placeHolder} 
-					   onKeyUp={(e) => this.onkeyup(e)} 
-					   onBlur={(e) => this.handler(e)} />
+					placeholder={this.state.placeholder} 
+					onKeyUp={(e) => this.onkeyup(e)} 
+					onBlur={(e) => this.handler(e)} />
 			</header>
 		)
 	}

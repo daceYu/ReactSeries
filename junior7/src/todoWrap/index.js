@@ -4,6 +4,9 @@
  * @Author: daceyu <daceyu@aliyun.com> 
  */
 import React,{Component} from 'react';
+import {createStore} from 'redux';
+import {dataChange} from '../redux/reducer';
+import CREATOR from '../redux/actionCreator';
 
 import './index.less';
 
@@ -11,31 +14,24 @@ import Header from '../todoHeader/index';
 import ListWrap from '../todoList/index';
 import Footer from '../todoFooter/index';
 
-// import Dispatcher from '../myFlux/dispatcher';
-import Store from '../myFlux/store';
-let store = new Store();
+let store = createStore(dataChange);
 
 export default class App extends Component {
 	constructor (props) {
 		super(props);
 
-		this.state = {
-			title: "Todos"  // 页面标题
-		}
-
-		// 以下代码无任何实际意义，只是测试中间件功能
-		/*Dispatcher.use( (action, next) => {
-			console.log(action, "中间件");
-			next();
-		})*/
+		/* 数据初始化 */
+		store.dispatch(CREATOR.getDataAsync());
 	}
 
 	/* HOOK */
 	render () {
 		return (
 			<article className="app">
-				<header className="outer-title g-fs120 f-tc"> {this.state.title} </header>
-				<section className="todo-wrap u-w92per g-center g-fs36">				
+				<header className="outer-title g-fs120 f-tc"> 
+					{store.getState().title}
+				</header>
+				<section className="todo-wrap g-center g-fs36">
 					<Header store={store} />
 					<ListWrap store={store} />
 					<Footer store={store} />
