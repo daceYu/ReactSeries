@@ -4,23 +4,25 @@
  * @Author: daceyu <daceyu@aliyun.com> 
  */
 import React,{Component} from 'react';
+import {connect} from 'react-redux';
+import CREATOR from '../redux/actionCreator';
 
 import './index.less';
 
-export default class Footer extends Component {
+class Footer extends Component {
 	constructor (props) {
 		super(props);
 
-		this.state = {}
-		this.observerUpdate();
+		/*this.state = {}
+		this.observerUpdate();*/
 	}
 
-	componentDidMount () {
+	/*componentDidMount () {
 		this.dataUpdate();
-	}
+	}*/
 
 	/* 数据更新 */
-	dataUpdate () {
+	/*dataUpdate () {
 		let _data = this.props.store.getState();
 		let _state = {
 			showFooter: _data.showFooter,
@@ -31,29 +33,29 @@ export default class Footer extends Component {
 			showclear: _data.footer.showClear
 		}
 		this.setState(_state);
-	}
+	}*/
 
 	/* 订阅 需要更新底部 功能区的 状态 */
-	observerUpdate () {
+	/*observerUpdate () {
 		this.props.store.subscribe(() => {
 			this.dataUpdate();
 		})
-	}
+	}*/
 
 	/** 
 	 * 切换展示不同状态的数据
 	 * @param {String} item: 状态值
 	 */
 	navToggle (item) {
-		if (this.state.showList === item) return false;
-		this.props.store.dispatch(this.props.creator.filterData({
+		if (this.props.showList === item) return false;
+		this.props.filterData({
 			current: item
-		}))
+		})
 	}
 
 	/* 清除已完成的任务 */
 	clean () {
-		this.props.store.dispatch(this.props.creator.cleanSelected());
+		this.props.cleanSelected();
 	}
 
 	/**
@@ -61,10 +63,10 @@ export default class Footer extends Component {
 	 * @return {Array} items: JSX
 	 */
 	getList () {
-		if (!this.state.listType) return "";
+		if (!this.props.listType) return "";
 
-		let itemJsx = this.state.listType.map((item, index) => 
-				<li className={item === this.state.showList ? "f-fl current" : "f-fl"}
+		let itemJsx = this.props.listType.map((item, index) => 
+				<li className={item === this.props.showList ? "f-fl current" : "f-fl"}
 					key={index}
 					onClick={(e) => this.navToggle(item, e)}
 				>{item}</li>
@@ -74,16 +76,32 @@ export default class Footer extends Component {
 
 	/* HOOK */
 	render () {
-		let _class = `todo-footer g-fs24 f-b_1px bt_1px ${this.state.showFooter ? "" : "z-hide"}`;
+		let _class = `todo-footer g-fs24 f-b_1px bt_1px ${this.props.showFooter ? "" : "z-hide"}`;
 		return (
 			<footer className={_class}>
 				<section className="u-flex">
-					<header>{this.state.text}</header>
+					<header>{this.props.text}</header>
 					{this.getList()}
-					<a className={this.state.showclear ? "" : "z-hide"}
-					   onClick={(e) => this.clean()}>{this.state.clean}</a>
+					<a className={this.props.showclear ? "" : "z-hide"}
+					   onClick={(e) => this.clean()}>{this.props.clean}</a>
 				</section>
 			</footer>
 		)
 	}
 }
+
+
+let mapStateToProps = (state, props) => {
+	console.log(state);
+	return {
+		showFooter: state.showFooter,
+		text: state.footer.remain_text,
+		listType: state.footer.func,
+		showList: state.footer.current,
+		clean: state.footer.clean_text,
+		showclear: state.footer.showClear
+	}
+}
+Footer = connect(mapStateToProps, CREATOR)(Footer);
+
+export default Footer;

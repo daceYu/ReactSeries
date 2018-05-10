@@ -4,8 +4,7 @@
  * @Author: daceyu <daceyu@aliyun.com> 
  */
 import React,{Component} from 'react';
-import {createStore} from 'redux';
-import {dataChange} from '../redux/reducer';
+import {connect} from 'react-redux';
 import CREATOR from '../redux/actionCreator';
 
 import './index.less';
@@ -14,14 +13,12 @@ import Header from '../todoHeader/index';
 import ListWrap from '../todoList/index';
 import Footer from '../todoFooter/index';
 
-let store = createStore(dataChange);
 
-export default class App extends Component {
+class App extends Component {
 	constructor (props) {
 		super(props);
 
-		/* 数据初始化 */
-		store.dispatch(CREATOR.getDataAsync());
+		// this.props.getDataAsync(); // 数据初始化
 	}
 
 	/* HOOK */
@@ -29,17 +26,25 @@ export default class App extends Component {
 		return (
 			<article className="app">
 				<header className="outer-title g-fs120 f-tc"> 
-					{store.getState().title}
+					{this.props.title}
 				</header>
 				<section className="todo-wrap g-center g-fs36">
-					<Header store={store} 
-						creator={CREATOR} />
-					<ListWrap store={store}
-						creator={CREATOR} />
-					<Footer store={store} 
-						creator={CREATOR} />
+					<Header />
+					<ListWrap />
+					<Footer />
 				</section>
 			</article>
 		)
 	}
 }
+
+let mapStateToProps = (state, props) => {
+	if (props.title !== state.title) {
+		return {
+			title: state.title
+		};
+	}
+}
+App = connect(mapStateToProps, CREATOR)(App);
+
+export default App;

@@ -80,7 +80,7 @@ let operateAll = (data) => {
 	for (let i in DATA.data) {
 		DATA.data[i].completed = DATA.completedAll;
 	}
-	DATA.footer.showClear = DATA.completedAll;	
+	DATA.footer.showClear = DATA.completedAll;
 	DATA.footer.remain_text = `${DATA.completedAll ? "0" : DATA.data.length} item left`;
 
 	return DATA;

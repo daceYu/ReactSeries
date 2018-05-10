@@ -4,19 +4,18 @@
  * @Author: daceyu <daceyu@aliyun.com> 
  */
 import React,{Component} from 'react';
+import {connect} from 'react-redux';
+import CREATOR from '../redux/actionCreator';
 
 import './index.less';
 
-export default class List extends Component {
+class List extends Component {
 	constructor (props) {
 		super(props);
-		this.state = {
-			items: []  // 列表Item JSX
-		}
 	}
 
 	/* HOOK */
-	componentDidMount () {
+	/*componentDidMount () {
 		let _data = this.props.store.getState();
 		let _state = {
 			func: _data.footer.func,
@@ -26,10 +25,10 @@ export default class List extends Component {
 
 		this.dataHandler(_state);
 		this.dataListener();
-	}
+	}*/
 
 	/* 订阅数据改变，重渲染 */
-	dataListener () {
+	/*dataListener () {
 		this.props.store.subscribe(() => {
 			let _state = this.state;
 			let _data = this.props.store.getState();
@@ -43,7 +42,7 @@ export default class List extends Component {
 			_state.func = _data.footer.func;
 			this.dataHandler(_state);
 		})
-	}
+	}*/
 
 	/**
 	 * 选中某条数据
@@ -51,10 +50,10 @@ export default class List extends Component {
 	 * @param {Boolean} status: 选中数据的状态
 	 */
 	selectItem (index, status) {
-		this.props.store.dispatch(this.props.creator.selectItem({
+		this.props.selectItem({
 			index,
 			completed: !status
-		}))
+		})
 	}
 
 	/**
@@ -62,16 +61,16 @@ export default class List extends Component {
 	 * @param {Number} index: 删除数据的序列号
 	 */
 	deleteItem (index) {
-		this.props.store.dispatch(this.props.creator.deleteItem({
+		this.props.deleteItem({
 			index
-		}))
+		})
 	}
 
 	/**
 	 * 处理任务列表数据
 	 * @param {Object} data: 任务列表数据
 	 */
-	dataHandler (data) {
+	/*dataHandler (data) {
 		let items = [];
 		for (let i in data.list) {
 			let info = data.list[i],
@@ -96,16 +95,55 @@ export default class List extends Component {
 			}
 		}
 		this.setState({ items });
-	}
+	}*/
 
 	/* HOOK */
 	render () {
+		console.log(this.props);
+		let items = [],
+			data = this.props;
+		for (let i in data.list) {
+			let info = data.list[i],
+				_class = (info.completed ? "selected " : "") + "f-b_1px bt_1px u-flex";
+
+			let str = (
+					<li className={_class}
+						key={i} 
+						index={i}>
+						<a className="select g-pr" 
+						   onClick={(e) => this.selectItem(i, info.completed)}> </a>
+						<p>{info.text}</p>
+						<a className="destory g-pr g-fs48 f-tr" 
+						   onClick={(e) => this.deleteItem(i)}>×</a>
+					</li>
+				);
+
+			if (data.current === data.func[0] || 
+			   (data.current === data.func[1] && !info.completed) ||
+			   (data.current === data.func[2] && info.completed)) { // 区分展示类型，All || Active || Completed
+				items.push(str);
+			}
+		}
+
 		return (
 			<article className="todo-list u-w">
 				<ul className="u-w">
-					{this.state.items}
+					{items}
 				</ul>
 			</article>
 		)
 	}
 }
+
+
+let mapStateToProps = (state, props) => {
+	console.log(state);
+	return {
+		func: state.footer.func,
+		current: state.footer.current,
+		list: state.data,
+	}
+}
+List = connect(mapStateToProps, CREATOR)(List);
+
+export default List;
