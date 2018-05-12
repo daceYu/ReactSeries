@@ -10,9 +10,9 @@ import CREATOR from '../redux/actionCreator';
 import './index.less';
 
 class Header extends Component {
-	constructor (props) {
+	/*constructor (props) {
 		super(props);
-	}
+	}*/
 
 	/* 全部选中 / 全部不选中 */
 	selectDataAll () {
@@ -60,13 +60,12 @@ class Header extends Component {
 
 
 let mapStateToProps = (state, props) => {
-	if (props.showIcon !== state.showIcon || props.completedAll !== state.completedAll || props.placeholder !== state.placeholder) {
-		return {
-			showIcon: state.showIcon,
-			completedAll: state.completedAll,
-			placeholder: state.header.placeholder
-		};
-	}
+	console.log(state);
+	return {
+		showIcon: state.showIcon,
+		completedAll: state.completedAll,
+		placeholder: state.header.placeholder
+	};
 }
 Header = connect(mapStateToProps, CREATOR)(Header);
 

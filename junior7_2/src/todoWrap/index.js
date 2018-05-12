@@ -15,11 +15,11 @@ import Footer from '../todoFooter/index';
 
 
 class App extends Component {
-	constructor (props) {
+	/*constructor (props) {
 		super(props);
 
 		// this.props.getDataAsync(); // 数据初始化
-	}
+	}*/
 
 	/* HOOK */
 	render () {
@@ -39,6 +39,7 @@ class App extends Component {
 }
 
 let mapStateToProps = (state, props) => {
+	// console.log(state);
 	if (props.title !== state.title) {
 		return {
 			title: state.title

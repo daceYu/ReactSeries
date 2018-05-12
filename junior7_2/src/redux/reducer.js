@@ -16,21 +16,21 @@ import DATA from './store';
 export function dataChange (state = DATA, action) {
 	switch (action.type) {
 		case TYPE.DATASYNC:
-			return Async(action.data);
+			return Object.assign({}, Async(action.data));
 		case TYPE.OPREATE_ALL:
-			return operateAll(action.data);
+			return Object.assign({}, operateAll(action.data));
 		case TYPE.ADD_DATA:
-			return addData(action.data);
+			return Object.assign({}, addData(action.data));
 		case TYPE.SELECT_ITEM:
-			return selectItem(action.data);
+			return Object.assign({}, selectItem(action.data));
 		case TYPE.DELECT_ITEM:
-			return delectItem(action.data);
+			return Object.assign({}, delectItem(action.data));
 		case TYPE.CLEAN_SELECTED:
-			return cleanSelected();
+			return Object.assign({}, cleanSelected());
 		case TYPE.FILTER_DATA:
 			return filterData(action.data);
 		default:
-			return initialData(DATA);
+			return Object.assign({}, initialData(DATA));
 	}
 }
 
@@ -50,21 +50,26 @@ let Async = (data) => {
  * @return {Object}
  */
 let initialData = (info) => {
-	let dataLength = info.data.length,
-		hasData = dataLength === 0;
-	info.showIcon = !hasData; // 是否展示输入框旁的icon
-	info.showFooter = !hasData; // 是否展示底部操作区
+	let hasData = info.data.some(function (currentValue,index,arr) {
+		if (currentValue) return true;
+		return false;
+	})
+	
+	info.showIcon = hasData; // 是否展示输入框旁的icon
+	info.showFooter = hasData; // 是否展示底部操作区
 
-	if (!hasData) {
-		let counterLeft = 0;
+	if (hasData) {
+		let counterLeft = 0,
+			showClear = false;
+		let items = [];
 		for (let i in info.data) {
-			if (!info.data[i].completed) counterLeft += 1;
+			info.data[i].completed ? showClear = true : counterLeft += 1;
+			items.push(info.data[i]);
 		}
-		// 是否展示底部操作区的clear按钮
-		info.footer.showClear = !(counterLeft === dataLength);
-		// 剩余item数量
+		info.data = items;
+
+		info.footer.showClear = showClear;
 		info.footer.remain_text = `${counterLeft} item left`;
-		// 是否全部选中
 		info.completedAll = counterLeft === 0;
 	}
 	return info;
@@ -76,13 +81,16 @@ let initialData = (info) => {
  * @return {Object} DATA: 组件store数据
  */
 let operateAll = (data) => {
+	let counterLeft = 0;
 	DATA.completedAll = data.completedAll;
 	for (let i in DATA.data) {
 		DATA.data[i].completed = DATA.completedAll;
+		counterLeft++;
 	}
 	DATA.footer.showClear = DATA.completedAll;
-	DATA.footer.remain_text = `${DATA.completedAll ? "0" : DATA.data.length} item left`;
+	DATA.footer.remain_text = `${counterLeft} item left`;
 
+	console.log(DATA);
 	return DATA;
 }
 
@@ -147,6 +155,21 @@ let cleanSelected = () => {
  * @return {Object} DATA: 组件store数据
  */
 let filterData = (data) => {
-	DATA.footer.current = data.current;
-	return DATA;
+	let _obj = Object.assign({}, DATA);
+	_obj.footer.current = data.current;
+
+	let _footer = _obj.footer,
+		items = [];
+
+	for (let i in _obj.data) {
+		let _completed = _obj.data[i].completed;
+		// 筛选 区分展示类型数据
+		( _footer.current === _footer.func[0] || 
+		 (_footer.current === _footer.func[1] && !_completed) || 
+		 (_footer.current === _footer.func[2] && _completed)
+		) && items.push(_obj.data[i]);
+	}
+	_obj.data = items;
+
+	return _obj;
 }

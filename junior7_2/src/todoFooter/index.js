@@ -10,38 +10,13 @@ import CREATOR from '../redux/actionCreator';
 import './index.less';
 
 class Footer extends Component {
-	constructor (props) {
+	/*constructor (props) {
 		super(props);
 
-		/*this.state = {}
-		this.observerUpdate();*/
-	}
-
-	/*componentDidMount () {
-		this.dataUpdate();
+		// this.state = {}
+		// this.observerUpdate();
 	}*/
-
-	/* 数据更新 */
-	/*dataUpdate () {
-		let _data = this.props.store.getState();
-		let _state = {
-			showFooter: _data.showFooter,
-			text: _data.footer.remain_text,
-			listType: _data.footer.func,
-			showList: _data.footer.current,
-			clean: _data.footer.clean_text,
-			showclear: _data.footer.showClear
-		}
-		this.setState(_state);
-	}*/
-
-	/* 订阅 需要更新底部 功能区的 状态 */
-	/*observerUpdate () {
-		this.props.store.subscribe(() => {
-			this.dataUpdate();
-		})
-	}*/
-
+	
 	/** 
 	 * 切换展示不同状态的数据
 	 * @param {String} item: 状态值
@@ -92,7 +67,6 @@ class Footer extends Component {
 
 
 let mapStateToProps = (state, props) => {
-	console.log(state);
 	return {
 		showFooter: state.showFooter,
 		text: state.footer.remain_text,
