@@ -58,20 +58,21 @@ let initialData = (info) => {
 	info.showIcon = hasData; // 是否展示输入框旁的icon
 	info.showFooter = hasData; // 是否展示底部操作区
 
+	let items = [];
 	if (hasData) {
 		let counterLeft = 0,
 			showClear = false;
-		let items = [];
 		for (let i in info.data) {
 			info.data[i].completed ? showClear = true : counterLeft += 1;
 			items.push(info.data[i]);
 		}
-		info.data = items;
 
 		info.footer.showClear = showClear;
 		info.footer.remain_text = `${counterLeft} item left`;
 		info.completedAll = counterLeft === 0;
 	}
+	info.data = items;
+	items = null;
 	return info;
 }
 
@@ -85,12 +86,10 @@ let operateAll = (data) => {
 	DATA.completedAll = data.completedAll;
 	for (let i in DATA.data) {
 		DATA.data[i].completed = DATA.completedAll;
-		counterLeft++;
+		if (!DATA.data[i].completed) counterLeft++;
 	}
 	DATA.footer.showClear = DATA.completedAll;
 	DATA.footer.remain_text = `${counterLeft} item left`;
-
-	console.log(DATA);
 	return DATA;
 }
 

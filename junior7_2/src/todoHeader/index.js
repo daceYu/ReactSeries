@@ -60,7 +60,6 @@ class Header extends Component {
 
 
 let mapStateToProps = (state, props) => {
-	console.log(state);
 	return {
 		showIcon: state.showIcon,
 		completedAll: state.completedAll,

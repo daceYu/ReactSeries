@@ -73,7 +73,7 @@ let mapStateToProps = (state, props) => {
 	return {
 		func: state.footer.func,
 		current: state.footer.current,
-		list: state.data
+		list: [].concat(state.data)
 	}
 }
 List = connect(mapStateToProps, CREATOR)(List);
