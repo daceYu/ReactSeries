@@ -5,8 +5,6 @@
  */
 import React from 'react';
 
-// import {connect} from 'react-redux';
-// import CREATOR from '../redux/actionCreator';
 import {connect} from '../myReduxReseries/react-redux/index';
 
 import './index.less';

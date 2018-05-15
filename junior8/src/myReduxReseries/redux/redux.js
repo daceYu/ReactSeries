@@ -5,13 +5,13 @@
 
 /**
  * createStore
- * @param  {[type]} reducer  [description]
- * @param  {[type]} enhancer [description]
+ * @param  {[type]} reducer
+ * @param  {[type]} enhancer: 使用applyMiddle组合的中间件
  * @return {Object}
  */
 let createStore = (reducer, enhancer) => {
-	if (enhancer) {
-		console.log(enhancer);
+	if (enhancer && typeof enhancer === "function") {
+		return enhancer(createStore)(reducer);
 	}
 
 	let currentState,
@@ -48,13 +48,45 @@ let createStore = (reducer, enhancer) => {
 }
 
 /**
- * [description]
- * @param  {[type]} middleWare [description]
- * @return {[type]}            [description]
+ * applyMiddleware
+ * @param  {[type]} middlewares: 中间件s
+ * @return {Object}
  */
-let applyMiddleware = (middleware) => {
-	// if ()
-	middleware();
+let applyMiddleware = (...middlewares) => {
+	// middleware => thunk
+	return (createStore) => (reducer) => {
+		const store = createStore(reducer);
+		let dispatch = store.dispatch;
+
+		// midApi就是createStore中的{getState, dispatch}
+		const midApi = {
+			getState: store.getState,
+			dispatch: (...args) => dispatch(...args)
+		}
+
+		// 绑定中间件，柯里化
+		const chain = middlewares.map((middleware) => middleware(midApi))
+		dispatch = compose(...chain)(store.dispatch);
+		
+		// createStore接收到enhancer时，执行该方法，返回
+		// 即此处应该返回跟createStore的相同结果{getState, subscribe, dispatch}
+		return {
+			...store, // createStore本来的结果
+			dispatch  // 添加中间件功能并差异更新上面的dispatch
+		}
+	}
+}
+
+/**
+ * compose去柯里化
+ * 对传进来的方法进行组合(fn1, fn2, fn3...);
+ * @return fn1(fn2(fn3(..)))
+ */
+let compose = (...funcs) => {
+	if (funcs.length === 0) return arg => arg;
+	if (funcs.length === 1) return funcs[0];
+
+	return funcs.reduce((result, item) => (...args) => result(item(...args)))
 }
 
 /**
@@ -87,5 +119,6 @@ let bindActionCreators = (creators, dispatch) => {
 export {
 	createStore,
 	bindActionCreators,
-	applyMiddleware
+	applyMiddleware,
+	compose
 }

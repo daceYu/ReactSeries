@@ -3,14 +3,13 @@
  * @UI: 750px
  * @Author: daceyu <daceyu@aliyun.com> 
  */
-import React,{Component} from 'react';
-// import {connect} from 'react-redux';
+import React from 'react';
 import {connect} from '../myReduxReseries/react-redux/index';
-import CREATOR from '../redux/actionCreator';
+import {selectItem, deleteItem} from '../redux/actionCreator';
 
 import './index.less';
 
-class List extends Component {
+class List extends React.Component {
 	/*constructor (props) {
 		super(props);
 	}*/
@@ -77,6 +76,7 @@ let mapStateToProps = (state, props) => {
 		list: [].concat(state.data)
 	}
 }
-List = connect(mapStateToProps, CREATOR)(List);
+let ActionCreators = {selectItem, deleteItem};
+List = connect(mapStateToProps, ActionCreators)(List);
 
 export default List;

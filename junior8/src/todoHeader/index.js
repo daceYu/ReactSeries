@@ -3,14 +3,13 @@
  * @UI: 750px
  * @Author: daceyu <daceyu@aliyun.com> 
  */
-import React,{Component} from 'react';
-// import {connect} from 'react-redux';
+import React from 'react';
 import {connect} from '../myReduxReseries/react-redux/index';
-import CREATOR from '../redux/actionCreator';
+import {operateAll, addData} from '../redux/actionCreator';
 
 import './index.less';
 
-class Header extends Component {
+class Header extends React.Component {
 	/*constructor (props) {
 		super(props);
 	}*/
@@ -67,6 +66,7 @@ let mapStateToProps = (state, props) => {
 		placeholder: state.header.placeholder
 	};
 }
-Header = connect(mapStateToProps, CREATOR)(Header);
+let ActionCreators = {operateAll, addData};
+Header = connect(mapStateToProps, ActionCreators)(Header);
 
 export default Header;

@@ -22,7 +22,7 @@ let getDataAsync = () => {
 		setTimeout(() => {
 			console.log('请求结束，渲染数据');
             dispatch(dataInit(data));
-        }, 500)
+        }, 100)
 	}
 }
 
@@ -33,6 +33,7 @@ let getDataAsync = () => {
  */
 let dataInit = (data) => {
 	return {
+		LOGTEST: "这是log中间件测试",
 		type: TYPE.DATASYNC,
 		data
 	}
@@ -109,7 +110,7 @@ let filterData = (data) => {
 }
 
 
-export default {
+export {
 	operateAll,
 	addData,
 	selectItem,

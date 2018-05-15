@@ -3,14 +3,13 @@
  * @UI: 750px
  * @Author: daceyu <daceyu@aliyun.com> 
  */
-import React,{Component} from 'react';
-// import {connect} from 'react-redux';
+import React from 'react';
 import {connect} from '../myReduxReseries/react-redux/index';
-import CREATOR from '../redux/actionCreator';
+import {filterData, cleanSelected} from '../redux/actionCreator';
 
 import './index.less';
 
-class Footer extends Component {
+class Footer extends React.Component {
 	/*constructor (props) {
 		super(props);
 
@@ -77,6 +76,7 @@ let mapStateToProps = (state, props) => {
 		showclear: state.footer.showClear
 	}
 }
-Footer = connect(mapStateToProps, CREATOR)(Footer);
+let ActionCreators = {filterData, cleanSelected};
+Footer = connect(mapStateToProps, ActionCreators)(Footer);
 
 export default Footer;
